@@ -219,7 +219,7 @@ def load_file(file_path):
                 "object": {
                     "id": drug_id,
                     "PUBCHEM": drug_id.split(':')[-1] if drug_id.startswith("PUBCHEM:") else "NA",
-                    "CHEMBL.COMPOUND": drug_id.split(':')[-1] if drug_id.startswith("CHEMBL.COMPOUND:") else "NA",
+                    "CHEMBL": drug_id.split(':')[-1] if drug_id.startswith("CHEMBL.COMPOUND:") else "NA",
                     "CHEBI": drug_id if drug_id.startswith("CHEBI:") else "NA",
                     "name": drug_name,
                     "type": "ChemicalSubstance"
