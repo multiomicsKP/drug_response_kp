@@ -249,7 +249,7 @@ def load_file(file_path):
 
 
 def load_data(data_folder):
-    folder_path = os.path.join(data_folder, "ALL_csvs/*IC50_GDSC.csv")
+    folder_path = os.path.join(data_folder, "*IC50_GDSC.csv")
     integrate_lincs(data_folder)
     integrate_manual_mapping(data_folder)
     for path in glob.glob(folder_path):
