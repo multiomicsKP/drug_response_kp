@@ -7,14 +7,13 @@
     },
     "dumper": {
         "data_url": [
-            "https://storage.googleapis.com/multiomics_provider_kp_data/drug_response/drug_response_gene_expression_all_data.zip",
-            "https://storage.googleapis.com/multiomics_provider_kp_data/drug_response/drug_response_gene_expression_nodes.csv"
+            "https://storage.googleapis.com/multiomics_provider_kp_data/drug_response/Table_DrugResponse_KP.csv.gz"
         ],
         "uncompress": true,
         "release": "version:get_release"
     },
     "uploader": {
-        "parser": "parser_gene_expression:load_data",
+        "parser": "parser:load_data",
         "on_duplicates": "ignore"
     }
 }
