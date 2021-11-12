@@ -272,13 +272,13 @@ def load_data(data_folder):
 
 def main():
     counter = 0
-    verbose = True
+    verbose = False
     for row in load_data('.'):
         if verbose:
             print(json.dumps(row, sort_keys=True, indent=2))
         counter += 1
-        if counter >= 2:
-            break
+        #if counter >= 2:
+        #    break
 
 
 if __name__ == "__main__":
