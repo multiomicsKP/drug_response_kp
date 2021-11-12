@@ -84,6 +84,7 @@ def load_file(filename_path):
 
         reader = csv.reader(infile, delimiter=',')
         first_line = True
+        counter = 0
 
         # Get edge data
         for line in reader:
@@ -95,16 +96,44 @@ def load_file(filename_path):
 
             print(line)
 
+
+            counter += 1
+
+            subject_id = line[1]
+            if subject_id.startswith('ENSG0'):
+                subject_id = 'ENSEMBL:' + subject_id
+            else:
+                raise Exception(f"subject_id {subject_id} does not begin with ENSG0")
+
+            components = subject_id.split(':')
+            if len(components) == 2:
+                extra_property = components[0].lower()
+            else:
+                raise Exception(f"Unable to split {subject_id} on a colon")
+
             subject = {
-                "id": line[1],
+                "id": subject_id,
                 "name": line[0],
+                extra_property: subject_id,
                 "type": 'biolink:' + line[4]
             }
 
+            object_category = line[8]
+            if object_category == 'ChemicalSubstance':
+                object_category = 'SmallMolecule'
+
+            object_id = line[7]
+            components = object_id.split(':')
+            if len(components) == 2:
+                extra_property = components[0].lower()
+            else:
+                raise Exception(f"Unable to split {object_id} on a colon")
+
             object_ = {
-                "id": line[7],
+                "id": object_id,
                 "name": line[6],
-                "type": 'biolink:' + line[8]
+                extra_property: object_id,
+                "type": 'biolink:' + object_category
             }
 
             edge_attributes = []
@@ -133,35 +162,36 @@ def load_file(filename_path):
                     "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
                     "attribute_type_id": "EDAM:data_0951", # statistical estimate score -- http://edamontology.org/data_0951
                     "description": "Confidence metric for the association",
-                    "value": line[13],
+                    "value": float(line[13]),
                     "value_type_id": "EDAM:data_1669",   # P-value -- http://edamontology.org/data_1669
                     "attributes": attributes
                 }
             )
 
             # sample size
-            #edge_attributes.append(
-            #    {
-            #        "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
-            #        "attribute_type_id": "biolink:?????",
-            #        "description": "Sample size to compute the correlation",
-            #        "value": line[16],
-            #        "value_type_id": "biolink:sample_size"   # made this up
-            #    }
-            #)
+            edge_attributes.append(
+                {
+                    "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
+                    "attribute_type_id": "GECKO:0000106", # sample size - http://purl.obolibrary.org/obo/GECKO_0000106
+                    "description": "Sample size used to compute the correlation",
+                    "value": int(line[16]),
+                }
+            )
 
-                        # disease context
-            #edge_attributes.append(
-            #    {
-            #        "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
-            #        "attribute_type_id": "biolink:?????",
-            #        "description": "Disease context for the gene-drug sensitivity association",
-            #        "value": line[18],
-            #        "value_type_id": "biolink:disease_context"   # made this up
-            #    }
-            #)
+            # disease context
+            edge_attributes.append(
+                {
+                    "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
+                    "attribute_type_id": "biolink:has_disease_context", # I made this up, but similar to biolink:has_population_context
+                    "description": "Disease context for the gene-drug sensitivity association",
+                    "value": line[18],
+                    "value_type_id": "biolink:id"
+                }
+            )
 
             # GDSC
+            pmid = line[20]
+            pmid = pmid.replace(' ', '')
             edge_attributes.append(
                 {
                     "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
@@ -174,8 +204,8 @@ def load_file(filename_path):
                             "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
                             "attribute_type_id": "biolink:Publication",
                             "description": "Publication describing the dataset used to compute the association",
-                            "value": line[20],
-                            "value_type_id": "EDAM:data_1187" # PubMed ID -- http://edamontology.org/data_1187
+                            "value": pmid,
+                            "value_type_id": "biolink:id"
                     }
                 }
             )
@@ -187,7 +217,8 @@ def load_file(filename_path):
 
             # Yield subject, predicate, and object properties
             yield {
-                "_id": '-'.join([line[1], line[7], line[9], line[13]]),
+                #"_id": '-'.join([line[1], line[7], line[9], line[13]]),
+                "_id": f"DRKP-{counter}",
                 "subject": subject,
                 "association": association,
                 "object": object_
