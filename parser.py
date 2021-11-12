@@ -9,6 +9,13 @@ distinction_type = {
                 "description": "Sensitivity to the drug is associated with genetic variants of the gene",
                 "value": "biolink:GeneHasVariantThatContributesToDrugSensitivityAssociation", # made up but similar to real GeneHasVariantThatContributesToDiseaseAssociation
                 "value_type_id": "biolink:id"
+        },
+        "Expression": {
+                "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
+                "attribute_type_id": "biolink:GeneToDrugAssociation", # made up but similar to real GeneToDiseaseAssociation
+                "description": "Sensitivity to the drug is associated with expression of the gene",
+                "value": "biolink:GeneHasExpressionThatContributesToDrugSensitivityAssociation", # made up but similar to real GeneHasVariantThatContributesToDiseaseAssociation
+                "value_type_id": "biolink:id"
         }
 }
 
@@ -37,7 +44,7 @@ correlation_statistic = {
                 "value": "NCIT:C53231", # t-Test -- http://purl.obolibrary.org/obo/NCIT_C53231
                 "value_type_id": "biolink:id"
         },
-        "Spearman": {
+        "Spearman_correlation": {
                 "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
                 "attribute_type_id": "NCIT:C53236", # Correlation Test -- http://purl.obolibrary.org/obo/NCIT_C53236
                 "description": "Spearman Correlation Test was used to compute the p-value for the association",
@@ -94,7 +101,7 @@ def load_file(filename_path):
                 first_line = False
                 continue
 
-            print(line)
+            #print(line)
 
 
             counter += 1
@@ -102,14 +109,19 @@ def load_file(filename_path):
             subject_id = line[1]
             if subject_id.startswith('ENSG0'):
                 subject_id = 'ENSEMBL:' + subject_id
+            elif subject_id.startswith('ENSEMBL:'):
+                pass
+            elif subject_id == '':
+                print(f"ERROR: Empty CURIE for subject at line {counter}")
+                continue
             else:
-                raise Exception(f"subject_id {subject_id} does not begin with ENSG0")
+                raise Exception(f"subject_id {subject_id} does not begin with ENSG0 or ENSEMBL: at line {counter}")
 
             components = subject_id.split(':')
             if len(components) == 2:
-                extra_property = components[0].lower()
+                extra_property = components[0]
             else:
-                raise Exception(f"Unable to split {subject_id} on a colon")
+                raise Exception(f"Unable to split {subject_id} on a single colon at line {counter}")
 
             subject = {
                 "id": subject_id,
@@ -123,11 +135,26 @@ def load_file(filename_path):
                 object_category = 'SmallMolecule'
 
             object_id = line[7]
+            if object_id.startswith('CHEMBL:'):
+                object_id = 'CHEMBL.COMPOUND:' + object_id.split(':')[1]
+            elif object_id.startswith('CHEMBL'):
+                object_id = 'CHEMBL.COMPOUND:' + object_id
+            elif object_id.startswith('CHEBI:'):
+                pass
+            elif object_id.startswith('HMS_LINCS_ID:'):
+                pass
+            elif object_id.startswith('CID:'):
+                pass
+            elif object_id.startswith('PUBCHEM:'):
+                pass
+            else:
+                raise Exception(f"object_id '{object_id}' does not begin with CHEMBL at line {counter}")
+
             components = object_id.split(':')
             if len(components) == 2:
-                extra_property = components[0].lower()
+                extra_property = components[0]
             else:
-                raise Exception(f"Unable to split {object_id} on a colon")
+                raise Exception(f"Unable to split {object_id} on a single colon at line {counter}")
 
             object_ = {
                 "id": object_id,
@@ -215,6 +242,9 @@ def load_file(filename_path):
                 "edge_attributes": edge_attributes
             }
 
+            #if counter / 10000 == int(counter / 10000):
+            #    print(f"{counter}.. ", end='', flush=True)
+
             # Yield subject, predicate, and object properties
             yield {
                 #"_id": '-'.join([line[1], line[7], line[9], line[13]]),
@@ -233,11 +263,13 @@ def load_data(data_folder):
 
 def main():
     counter = 0
+    verbose = False
     for row in load_data('.'):
-        print(json.dumps(row, sort_keys=True, indent=2))
+        if verbose:
+            print(json.dumps(row, sort_keys=True, indent=2))
         counter += 1
-        if counter >= 2:
-            break
+        #if counter >= 2:
+        #    break
 
 
 if __name__ == "__main__":
