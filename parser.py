@@ -93,7 +93,6 @@ def load_file(filename_path):
         first_line = True
         counter = 0
         record_ids = {}
-        record_id_hashes = {}
 
         # Get edge data
         for line in reader:
@@ -251,18 +250,14 @@ def load_file(filename_path):
             record_id = 'DRKP-' + '-'.join( [ subject_id, line[9], object_id, line[18], line[13] ] )
             if record_id in record_ids:
                 record_ids[record_id] += 1
-                print(f"WARNING: Duplicate record id {record_id} found on line {counter}")
+                print(f"ERROR: Duplicate record id {record_id} found on line {counter}")
                 record_id += f"-{record_ids[record_id]}"
             else:
                 record_ids[record_id] = 1
-            record_id_hash = 'DRKP:' + str(hash(record_id))
-            if record_id_hash in record_id_hashes:
-                print(f"WARNING: Hash collision on line {counter}")
-                record_id_hash = record_id
 
             # Yield subject, predicate, and object properties
             yield {
-                "_id": record_id_hash,
+                "_id": record_id,
                 "subject": subject,
                 "association": association,
                 "object": object_
@@ -277,13 +272,13 @@ def load_data(data_folder):
 
 def main():
     counter = 0
-    verbose = False
+    verbose = True
     for row in load_data('.'):
         if verbose:
             print(json.dumps(row, sort_keys=True, indent=2))
         counter += 1
-        #if counter >= 2:
-        #    break
+        if counter >= 2:
+            break
 
 
 if __name__ == "__main__":
