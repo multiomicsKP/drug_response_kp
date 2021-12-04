@@ -108,15 +108,15 @@ def load_file(filename_path):
             counter += 1
 
             subject_id = line[1]
-            if subject_id.startswith('ENSG0'):
-                subject_id = 'ENSEMBL:' + subject_id
-            elif subject_id.startswith('ENSEMBL:'):
-                pass
-            elif subject_id == '':
-                print(f"ERROR: Empty CURIE for subject at line {counter}")
-                continue
-            else:
-                raise Exception(f"subject_id {subject_id} does not begin with ENSG0 or ENSEMBL: at line {counter}")
+            #if subject_id.startswith('ENSG0'):
+            #    subject_id = 'ENSEMBL:' + subject_id
+            #elif subject_id.startswith('ENSEMBL:'):
+            #    pass
+            #elif subject_id == '':
+            #    print(f"ERROR: Empty CURIE for subject at line {counter}")
+            #    continue
+            #else:
+            #    raise Exception(f"subject_id {subject_id} does not begin with ENSG0 or ENSEMBL: at line {counter}")
 
             components = subject_id.split(':')
             if len(components) == 2:
