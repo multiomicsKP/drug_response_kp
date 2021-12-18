@@ -1,4 +1,5 @@
 import os
+import sys
 import csv
 import json
 
@@ -86,7 +87,7 @@ def verify_header_line(line):
 
 
 def load_file(filename_path):
-    print(f"INFO: Reading {filename_path}")
+    print(f"INFO: Reading {filename_path}", file=sys.stderr)
     with open(filename_path) as infile:
 
         reader = csv.reader(infile, delimiter=',')
@@ -108,7 +109,6 @@ def load_file(filename_path):
             counter += 1
 
             subject_id = line[1]
-            
             #if subject_id.startswith('ENSG0'):
             #    subject_id = 'ENSEMBL:' + subject_id
             #elif subject_id.startswith('ENSEMBL:'):
@@ -262,8 +262,8 @@ def load_file(filename_path):
 
 
 def load_data(data_folder):
-    #filename_path = os.path.join(data_folder, "Table_DrugResponse_KP_v2021.11.21.csv")
-    filename_path = os.path.join(data_folder, "test.csv")
+    filename_path = os.path.join(data_folder, "Table_DrugResponse_KP_v2021.11.21.csv")
+    #filename_path = os.path.join(data_folder, "test.csv")
 
 
     for row in load_file(filename_path):
