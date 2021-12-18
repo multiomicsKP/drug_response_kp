@@ -9,6 +9,13 @@ distinction_type = {
                 "description": "Sensitivity to the drug is associated with genetic variants of the gene",
                 "value": "biolink:GeneHasVariantThatContributesToDrugSensitivityAssociation", # made up but similar to real GeneHasVariantThatContributesToDiseaseAssociation
                 "value_type_id": "biolink:id"
+        },
+        "Expression": {
+                "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
+                "attribute_type_id": "biolink:GeneToDrugAssociation", # made up but similar to real GeneToDiseaseAssociation
+                "description": "Sensitivity to the drug is associated with expression of the gene",
+                "value": "biolink:GeneHasExpressionThatContributesToDrugSensitivityAssociation", # made up but similar to real GeneHasVariantThatContributesToDiseaseAssociation
+                "value_type_id": "biolink:id"
         }
 }
 
@@ -37,7 +44,7 @@ correlation_statistic = {
                 "value": "NCIT:C53231", # t-Test -- http://purl.obolibrary.org/obo/NCIT_C53231
                 "value_type_id": "biolink:id"
         },
-        "Spearman": {
+        "Spearman_correlation": {
                 "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
                 "attribute_type_id": "NCIT:C53236", # Correlation Test -- http://purl.obolibrary.org/obo/NCIT_C53236
                 "description": "Spearman Correlation Test was used to compute the p-value for the association",
@@ -84,6 +91,8 @@ def load_file(filename_path):
 
         reader = csv.reader(infile, delimiter=',')
         first_line = True
+        counter = 0
+        record_ids = {}
 
         # Get edge data
         for line in reader:
@@ -93,31 +102,81 @@ def load_file(filename_path):
                 first_line = False
                 continue
 
-            print(line)
+            #print(line)
+
+
+            counter += 1
+
+            subject_id = line[1]
+            
+            #if subject_id.startswith('ENSG0'):
+            #    subject_id = 'ENSEMBL:' + subject_id
+            #elif subject_id.startswith('ENSEMBL:'):
+            #    pass
+            #elif subject_id == '':
+            #    print(f"ERROR: Empty CURIE for subject at line {counter}")
+            #    continue
+            #else:
+            #    raise Exception(f"subject_id {subject_id} does not begin with ENSG0 or ENSEMBL: at line {counter}")
+
+            components = subject_id.split(':')
+            if len(components) == 2:
+                extra_property = components[0]
+            else:
+                raise Exception(f"Unable to split {subject_id} on a single colon at line {counter}")
 
             subject = {
-                "id": line[1],
+                "id": subject_id,
                 "name": line[0],
+                extra_property: subject_id,
                 "type": 'biolink:' + line[4]
             }
 
+            object_category = line[8]
+            if object_category == 'ChemicalSubstance':
+                object_category = 'SmallMolecule'
+
+            object_id = line[7]
+            if object_id.startswith('CHEMBL:'):
+                object_id = 'CHEMBL.COMPOUND:' + object_id.split(':')[1]
+            elif object_id.startswith('CHEMBL'):
+                object_id = 'CHEMBL.COMPOUND:' + object_id
+            elif object_id.startswith('CHEBI:'):
+                pass
+            elif object_id.startswith('HMS_LINCS_ID:'):
+                pass
+            elif object_id.startswith('CID:'):
+                pass
+            elif object_id.startswith('PUBCHEM:'):
+                pass
+            else:
+                raise Exception(f"object_id '{object_id}' does not begin with CHEMBL at line {counter}")
+
+            components = object_id.split(':')
+            if len(components) == 2:
+                extra_property = components[0]
+            else:
+                raise Exception(f"Unable to split {object_id} on a single colon at line {counter}")
+
             object_ = {
-                "id": line[7],
+                "id": object_id,
                 "name": line[6],
-                "type": 'biolink:' + line[8]
+                extra_property: object_id,
+                "type": 'biolink:' + object_category
             }
 
-            edge_attributes = []
+            edge_attributes = {}
 
             # could be Genetic variants / Gene expression
             if line[10] in distinction_type:
-                edge_attributes.append(distinction_type[line[10]])
+                edge_attributes['Subject_modifier'] = distinction_type[line[10]]
+                    
             else:
                 raise Exception(f"Column 10 has unexpected value {line[10]}")
 
             # could be IC50 / AUC
             if line[11] in concentration_endpoint:
-                edge_attributes.append(concentration_endpoint[line[11]])
+                edge_attributes["Object_modifier"]= concentration_endpoint[line[11]]
             else:
                 raise Exception(f"Column 11 has unexpected value {line[11]}")
 
@@ -128,66 +187,74 @@ def load_file(filename_path):
                 raise Exception(f"Column 12 has unexpected value {line[12]}")
 
             # p-value
-            edge_attributes.append(
-                {
+            edge_attributes["P-value"] = {
                     "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
                     "attribute_type_id": "EDAM:data_0951", # statistical estimate score -- http://edamontology.org/data_0951
                     "description": "Confidence metric for the association",
-                    "value": line[13],
+                    "value": float(line[13]),
                     "value_type_id": "EDAM:data_1669",   # P-value -- http://edamontology.org/data_1669
                     "attributes": attributes
                 }
-            )
+            
 
             # sample size
-            #edge_attributes.append(
-            #    {
-            #        "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
-            #        "attribute_type_id": "biolink:?????",
-            #        "description": "Sample size to compute the correlation",
-            #        "value": line[16],
-            #        "value_type_id": "biolink:sample_size"   # made this up
-            #    }
-            #)
+            edge_attributes["Sample_size"] = {
+                    "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
+                    "attribute_type_id": "GECKO:0000106", # sample size - http://purl.obolibrary.org/obo/GECKO_0000106
+                    "description": "Sample size used to compute the correlation",
+                    "value": int(line[16]),
+                }
+            
 
-                        # disease context
-            #edge_attributes.append(
-            #    {
-            #        "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
-            #        "attribute_type_id": "biolink:?????",
-            #        "description": "Disease context for the gene-drug sensitivity association",
-            #        "value": line[18],
-            #        "value_type_id": "biolink:disease_context"   # made this up
-            #    }
-            #)
-
+            # disease context
+            edge_attributes["Disease"] = {
+                    "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
+                    "attribute_type_id": "biolink:has_disease_context", # I made this up, but similar to biolink:has_population_context
+                    "description": "Disease context for the gene-drug sensitivity association",
+                    "value": line[18],
+                    "value_type_id": "biolink:id"
+                }
+            
             # GDSC
-            edge_attributes.append(
-                {
+            pmid = line[20]
+            pmid = pmid.replace(' ', '')
+            edge_attributes['Resource'] = {
                     "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
                     "attribute_type_id": "biolink:Dataset",
                     "description": "Dataset used to compute the association",
                     "value": line[19],
-                    "value_type_id": None,
+                    "value_type_id": "",
                     "attributes": 
                         {
                             "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
                             "attribute_type_id": "biolink:Publication",
                             "description": "Publication describing the dataset used to compute the association",
-                            "value": line[20],
-                            "value_type_id": "EDAM:data_1187" # PubMed ID -- http://edamontology.org/data_1187
+                            "value": pmid,
+                            "value_type_id": "biolink:id"
                     }
                 }
-            )
+            
 
             association = {
                 "edge_label": line[9],
                 "edge_attributes": edge_attributes
             }
 
-            # Yield subject, predicate, and object properties
+            #if counter / 10000 == int(counter / 10000):
+            #    print(f"{counter}.. ", end='', flush=True)
+
+            #### Create a unique record_id, verify that it's unique, and then create a hash to make it shorter
+            record_id = 'DRKP-' + '-'.join( [ subject_id, line[9], object_id, line[18], line[13] ] )
+            if record_id in record_ids:
+                record_ids[record_id] += 1
+                print(f"ERROR: Duplicate record id {record_id} found on line {counter}")
+                record_id += f"-{record_ids[record_id]}"
+            else:
+                record_ids[record_id] = 1
+
+                # Yield subject, predicate, and object properties
             yield {
-                "_id": '-'.join([line[1], line[7], line[9], line[13]]),
+                "_id": record_id,
                 "subject": subject,
                 "association": association,
                 "object": object_
@@ -195,18 +262,23 @@ def load_file(filename_path):
 
 
 def load_data(data_folder):
-    filename_path = os.path.join(data_folder, "Table_DrugResponse_KP.csv")
+    #filename_path = os.path.join(data_folder, "Table_DrugResponse_KP_v2021.11.21.csv")
+    filename_path = os.path.join(data_folder, "test.csv")
+
+
     for row in load_file(filename_path):
         yield row
 
 
 def main():
     counter = 0
+    verbose = True
     for row in load_data('.'):
-        print(json.dumps(row, sort_keys=True, indent=2))
+        if verbose:
+            print(json.dumps(row, sort_keys=True, indent=2))
         counter += 1
-        if counter >= 2:
-            break
+        #if counter >= 2:
+        #    break
 
 
 if __name__ == "__main__":
