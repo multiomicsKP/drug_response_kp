@@ -165,18 +165,17 @@ def load_file(filename_path):
                 "type": 'biolink:' + object_category
             }
 
-            edge_attributes = {}
+            edge_attributes = []
 
             # could be Genetic variants / Gene expression
             if line[10] in distinction_type:
-                edge_attributes['Subject_modifier'] = distinction_type[line[10]]
-                    
+                edge_attributes.append(distinction_type[line[10]])
             else:
                 raise Exception(f"Column 10 has unexpected value {line[10]}")
 
             # could be IC50 / AUC
             if line[11] in concentration_endpoint:
-                edge_attributes["Object_modifier"]= concentration_endpoint[line[11]]
+                edge_attributes.append(concentration_endpoint[line[11]])
             else:
                 raise Exception(f"Column 11 has unexpected value {line[11]}")
 
@@ -187,7 +186,8 @@ def load_file(filename_path):
                 raise Exception(f"Column 12 has unexpected value {line[12]}")
 
             # p-value
-            edge_attributes["P-value"] = {
+            edge_attributes.append(
+                {
                     "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
                     "attribute_type_id": "EDAM:data_0951", # statistical estimate score -- http://edamontology.org/data_0951
                     "description": "Confidence metric for the association",
@@ -195,35 +195,39 @@ def load_file(filename_path):
                     "value_type_id": "EDAM:data_1669",   # P-value -- http://edamontology.org/data_1669
                     "attributes": attributes
                 }
-            
+            )
 
             # sample size
-            edge_attributes["Sample_size"] = {
+            edge_attributes.append(
+                {
                     "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
                     "attribute_type_id": "GECKO:0000106", # sample size - http://purl.obolibrary.org/obo/GECKO_0000106
                     "description": "Sample size used to compute the correlation",
                     "value": int(line[16]),
                 }
-            
+            )
 
             # disease context
-            edge_attributes["Disease"] = {
+            edge_attributes.append(
+                {
                     "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
                     "attribute_type_id": "biolink:has_disease_context", # I made this up, but similar to biolink:has_population_context
                     "description": "Disease context for the gene-drug sensitivity association",
                     "value": line[18],
                     "value_type_id": "biolink:id"
                 }
-            
+            )
+
             # GDSC
             pmid = line[20]
             pmid = pmid.replace(' ', '')
-            edge_attributes['Resource'] = {
+            edge_attributes.append(
+                {
                     "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
                     "attribute_type_id": "biolink:Dataset",
                     "description": "Dataset used to compute the association",
                     "value": line[19],
-                    "value_type_id": "",
+                    "value_type_id": None,
                     "attributes": 
                         {
                             "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
@@ -233,7 +237,7 @@ def load_file(filename_path):
                             "value_type_id": "biolink:id"
                     }
                 }
-            
+            )
 
             association = {
                 "edge_label": line[9],
@@ -252,7 +256,7 @@ def load_file(filename_path):
             else:
                 record_ids[record_id] = 1
 
-                # Yield subject, predicate, and object properties
+            # Yield subject, predicate, and object properties
             yield {
                 "_id": record_id,
                 "subject": subject,
@@ -263,16 +267,13 @@ def load_file(filename_path):
 
 def load_data(data_folder):
     filename_path = os.path.join(data_folder, "Table_DrugResponse_KP_v2021.11.21.csv")
-    #filename_path = os.path.join(data_folder, "test.csv")
-
-
     for row in load_file(filename_path):
         yield row
 
 
 def main():
     counter = 0
-    verbose = True
+    verbose = False
     for row in load_data('.'):
         if verbose:
             print(json.dumps(row, sort_keys=True, indent=2))
