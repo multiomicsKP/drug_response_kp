@@ -240,7 +240,7 @@ def load_file(filename_path):
             )
 
             association = {
-                "edge_label": line[9],
+                "edge_label": '_'.join(line[9].split(' ')),
                 "edge_attributes": edge_attributes
             }
 
@@ -273,7 +273,7 @@ def load_data(data_folder):
 
 def main():
     counter = 0
-    verbose = False
+    verbose = True
     for row in load_data('.'):
         if verbose:
             print(json.dumps(row, sort_keys=True, indent=2))
