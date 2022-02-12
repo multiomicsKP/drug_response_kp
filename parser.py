@@ -138,9 +138,9 @@ def load_file(filename_path):
 
             object_id = line[7]
             if object_id.startswith('CHEMBL:'):
-                object_id = 'CHEMBL.COMPOUND:' + object_id.split(':')[1]
+                object_id = 'CHEMBL_COMPOUND:' + object_id.split(':')[1]
             elif object_id.startswith('CHEMBL'):
-                object_id = 'CHEMBL.COMPOUND:' + object_id
+                object_id = 'CHEMBL_COMPOUND:' + object_id
             elif object_id.startswith('CHEBI:'):
                 pass
             elif object_id.startswith('HMS_LINCS_ID:'):
