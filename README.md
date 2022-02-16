@@ -2,21 +2,21 @@
 Multiomics-biggim-drugresponse KP is developed the Multiomics team supported by the Service Provider (BioThings+SmartAPI) team and the Exploring Agent (BTE) team under the NCATs [Translator](https://github.com/NCATSTranslator) project. The design of the predicates is supported by the Biolink team. It is modeled using the cancer cell line data from GDSC to find the emperial associations between gene mutation, gene expression and drug sensitivity measurements (Area under the curve (AUC) or IC50). 
 
 ## Description of the embbeded graphs
-Subject: Gene
-Object: SmallMolecule
+Subject: Gene \
+Object: SmallMolecule \ 
 Predicates: [biolink:associated_with_sensitivity_to, biolink:associated_with_sensitivity_to]
 
 ## EPC infomation:
-Data resource: Genomics of Drug Sensitivity in Cancer (GDSC), Francesco Iorio et al., Cell, 2016
-P-value: the significance of t-test statistics of the IC50 values between the mutated cell lines and the wild type cell lines. (mutation)
-Effect size: the difference of IC50 values between the mutated cell lines and the wild type cell lines.
-Correlation coefficient: Spearman correlation coefficient
-sample size: the number of samples
+Data resource: Genomics of Drug Sensitivity in Cancer (GDSC), Francesco Iorio et al., Cell, 2016 \
+P-value: the significance of t-test statistics of the IC50 values between the mutated cell lines and the wild type cell lines. (mutation)\
+Effect size: the difference of IC50 values between the mutated cell lines and the wild type cell lines.\
+Correlation coefficient: Spearman correlation coefficient\
+sample size: the number of samples\
 
 
 ## Example of queries
 ### Example1: which drugs are related to a gene?
-curl -X 'POST' \
+<code>curl -X 'POST' \
   'https://api.bte.ncats.io/v1/smartapi/adf20dd6ff23dfe18e8e012bde686e31/query' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
@@ -54,10 +54,10 @@ curl -X 'POST' \
     }
   }
 }'
-
+</code>
 
 ## Example 2: which drugs are associated with sensitivity to a gene?
-curl -X 'POST' \
+<code>curl -X 'POST' \
   'https://api.bte.ncats.io/v1/smartapi/adf20dd6ff23dfe18e8e012bde686e31/query' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
@@ -95,9 +95,9 @@ curl -X 'POST' \
     }
   }
 }'
-
+</code>
 ## Example 3: which drugs are associated with resistance to a gene?
-curl -X 'POST' \
+<code>curl -X 'POST' \
   'https://api.bte.ncats.io/v1/smartapi/adf20dd6ff23dfe18e8e012bde686e31/query' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/json' \
@@ -136,3 +136,4 @@ curl -X 'POST' \
   }
 }'
 
+</code>
