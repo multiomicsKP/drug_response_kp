@@ -8,11 +8,13 @@ Predicates: [biolink:associated_with_sensitivity_to, biolink:associated_with_sen
 
 ## EPC infomation:
 Data resource: Genomics of Drug Sensitivity in Cancer (GDSC), Francesco Iorio et al., Cell, 2016 \
-P-value: the significance of t-test statistics of the IC50 values between the mutated cell lines and the wild type cell lines. (mutation)\
-Effect size: the difference of IC50 values between the mutated cell lines and the wild type cell lines.\
-Correlation coefficient: Spearman correlation coefficient\
-sample size: the number of samples.
+P-value: the significance of t-test statistics of the IC50 values between the mutated cell lines and the wild type cell lines. (mutation-based)\
+P-value: the significance of Spearman correaltions between the AUC values and the gene expression in cell lines. (mutation-based)\
 
+Effect_size: the difference of IC50 values between the mutated cell lines and the wild type cell lines.\
+Correlation_coefficient: Spearman correlation coefficient\
+sample_size: the number of samples.
+disease_context: disease types (tumor types) for the cell lines.
 
 ## Example of queries:
 ### Example1: which drugs are related to a gene?
