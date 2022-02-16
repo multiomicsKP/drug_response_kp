@@ -3,7 +3,7 @@ Multiomics-biggim-drugresponse KP is developed the Multiomics team supported by 
 
 ## Description of the embbeded graphs:
 Subject: Gene\
-Object: SmallMolecule\ 
+Object: SmallMolecule \
 Predicates: [biolink:associated_with_sensitivity_to, biolink:associated_with_sensitivity_to]
 
 ## EPC infomation:
