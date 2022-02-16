@@ -2,15 +2,14 @@
 Multiomics-biggim-drugresponse KP is developed the Multiomics team supported by the Service Provider (BioThings+SmartAPI) team and the Exploring Agent (BTE) team under the NCATs [Translator](https://github.com/NCATSTranslator) project. The design of the predicates is supported by the Biolink team. It is modeled using the cancer cell line data from GDSC to find the emperial associations between gene mutation, gene expression and drug sensitivity measurements (Area under the curve (AUC) or IC50). 
 
 ## Description of the embbeded graphs:
-Subject: Gene \
-Object: SmallMolecule \ 
+Subject: Gene\
+Object: SmallMolecule\ 
 Predicates: [biolink:associated_with_sensitivity_to, biolink:associated_with_sensitivity_to]
 
 ## EPC infomation:
 Data resource: Genomics of Drug Sensitivity in Cancer (GDSC), Francesco Iorio et al., Cell, 2016 \
 P-value: the significance of t-test statistics of the IC50 values between the mutated cell lines and the wild type cell lines. (mutation-based)\
-P-value: the significance of Spearman correaltions between the AUC values and the gene expression in cell lines. (mutation-based)\
-
+P-value: the significance of Spearman correaltions between the AUC values and the gene expression in cell lines. (Expression-based)\
 Effect_size: the difference of IC50 values between the mutated cell lines and the wild type cell lines.\
 Correlation_coefficient: Spearman correlation coefficient\
 sample_size: the number of samples.
