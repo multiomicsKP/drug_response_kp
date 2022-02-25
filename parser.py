@@ -266,7 +266,7 @@ def load_file(filename_path):
 
 
 def load_data(data_folder):
-    filename_path = os.path.join(data_folder, "Table_DrugResponse_KP_v2021.11.21.csv")
+    filename_path = os.path.join(data_folder, "Table_DrugResponse_KP_v2021.11.21_rm_redundance_v2022.2.25.csv")
     for row in load_file(filename_path):
         yield row
 
