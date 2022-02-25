@@ -7,7 +7,7 @@
     },
     "dumper": {
         "data_url": [
-            "https://storage.googleapis.com/multiomics_provider_kp_data/drug_response/Table_DrugResponse_KP_v2021.11.21.csv.gz"
+            "https://storage.googleapis.com/multiomics_provider_kp_data/drug_response/Table_DrugResponse_KP_v2021.11.21_rm_redundance_v2022.2.25.csv.gz"
         ],
         "uncompress": true,
         "release": "version:get_release"
