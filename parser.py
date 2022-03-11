@@ -55,6 +55,66 @@ correlation_statistic = {
 }
 
 
+class Identifier:
+    # as defined in https://github.com/biothings/biomedical_id_resolver.js/blob/master/src/config.ts#L4
+    ALWAYS_PREFIXED = set(['RHEA', 'GO', 'CHEBI', 'HP', 'MONDO', 'DOID', 'EFO', 'UBERON', 'MP', 'CL', 'MGI'])
+    
+    # see Colleen's suggestion in https://github.com/biothings/pending.api/issues/56#issuecomment-1063607497
+    # Prefix naming follows the biolink model, as defined in https://github.com/biolink/biolink-model/blob/master/context.jsonld
+    PREFIX_MAPPING = {
+        "PUBCHEM": "PUBCHEM.COMPOUND",
+        "CID": "PUBCHEM.COMPOUND",
+        "CHEMBL": "CHEMBL.COMPOUND"
+    }
+    
+    def __init__(self, _id: str):
+        self.full_id = _id
+        self.prefix = None
+        self.local_id = None
+    
+    def parse(self):
+        if not self.full_id:
+            raise TypeError(f"Cannot parse empty value. Got {self.full_id}.")
+        
+        id_parts = self.full_id.split(':')
+        num_parts = len(id_parts)
+        if num_parts != 2:
+            raise ValueError(f"Exactly 2 parts required after splitting on a single colon. Got {num_parts}.", num_parts)
+            
+        prefix, local_id = id_parts[0], id_parts[1]
+        self.prefix = self.PREFIX_MAPPING.get(prefix, prefix).replace(r".", r"_").lower()
+        self.local_id = local_id if prefix not in self.ALWAYS_PREFIXED else local_id
+        
+    def to_dict(self, full_id_key="id"):
+        return { full_id_key: self.full_id, self.prefix: self.local_id }
+    
+    @classmethod
+    def create_subject_id(cls, _id: str):
+        try:
+            id_obj = cls(_id)
+            id_obj.parse()
+        except TypeError:
+            return None
+        except ValueError as ve:
+            num_parts = ve.args[1]
+            if num_parts == 1 and _id.startswith('ENSG0'):
+                return cls.create_subject_id('ENSEMBL:' + _id)
+            else:
+                return None
+            
+        return id_obj
+            
+    @classmethod
+    def create_object_id(cls, _id: str): 
+        try:
+            id_obj = Identifier(_id)
+            id_obj.parse()
+        except (TypeError, ValueError):
+            return None
+        
+        return id_obj
+
+
 
 
 

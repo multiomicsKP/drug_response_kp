@@ -22,11 +22,11 @@ def custom_mapping(cls):
                     "normalizer": "keyword_lowercase_normalizer",
                     "type": "keyword"
                 },
-                "ENSEMBL": {
+                "type": {
                     "normalizer": "keyword_lowercase_normalizer",
                     "type": "keyword"
                 },
-                "type": {
+                "ensembl": {
                     "normalizer": "keyword_lowercase_normalizer",
                     "type": "keyword"
                 }
@@ -48,27 +48,23 @@ def custom_mapping(cls):
                 "name": {
                     "type": "text"
                 },
-                "CHEBI": {
-                    "normalizer": "keyword_lowercase_normalizer",
-                    "type": "keyword"
-                },
                 "type": {
                     "normalizer": "keyword_lowercase_normalizer",
                     "type": "keyword"
                 },
-                "CHEMBL.COMPOUND": {
+                "chebi": {
                     "normalizer": "keyword_lowercase_normalizer",
                     "type": "keyword"
                 },
-                "PUBCHEM": {
+                "chembl_compound": {
                     "normalizer": "keyword_lowercase_normalizer",
                     "type": "keyword"
                 },
-                "HMS_LINCS_ID": {
+                "pubchem_compound": {
                     "normalizer": "keyword_lowercase_normalizer",
                     "type": "keyword"
                 },
-                "CID": {
+                "hms_lincs_id": {
                     "normalizer": "keyword_lowercase_normalizer",
                     "type": "keyword"
                 }
