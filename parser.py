@@ -82,7 +82,10 @@ class Identifier:
             raise ValueError(f"Exactly 2 parts required after splitting on a single colon. Got {num_parts}.", num_parts)
             
         prefix, local_id = id_parts[0], id_parts[1]
-        self.prefix = self.PREFIX_MAPPING.get(prefix, prefix).replace(r".", r"_").lower()
+        prefix = self.PREFIX_MAPPING.get(prefix, prefix)
+        
+        self.full_id = f"{prefix}:{local_id}"
+        self.prefix = prefix.replace(r".", r"_").lower()
         self.local_id = local_id if prefix not in self.ALWAYS_PREFIXED else local_id
         
     def to_dict(self, full_id_key="id"):
