@@ -29,6 +29,10 @@ def custom_mapping(cls):
                 "ensembl": {
                     "normalizer": "keyword_lowercase_normalizer",
                     "type": "keyword"
+                },
+                "entrez": {
+                    "normalizer": "keyword_lowercase_normalizer",
+                    "type": "keyword"
                 }
             }
         },
