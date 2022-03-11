@@ -168,61 +168,40 @@ def load_file(filename_path):
 
             counter += 1
 
-            subject_id = line[1]
-            #if subject_id.startswith('ENSG0'):
-            #    subject_id = 'ENSEMBL:' + subject_id
-            #elif subject_id.startswith('ENSEMBL:'):
-            #    pass
-            #elif subject_id == '':
-            #    print(f"ERROR: Empty CURIE for subject at line {counter}")
-            #    continue
-            #else:
-            #    raise Exception(f"subject_id {subject_id} does not begin with ENSG0 or ENSEMBL: at line {counter}")
-
-            components = subject_id.split(':')
-            if len(components) == 2:
-                extra_property = components[0]
-            else:
-                raise Exception(f"Unable to split {subject_id} on a single colon at line {counter}")
-
+            subject_id = Identifier.create_subject_id(line[1])
+            if subject_id is None:
+                continue
+                
+            # subject = {
+            #     "id": subject_id,
+            #     "name": line[0],
+            #     subject_id_key: subject_id_value,
+            #     "type": 'biolink:' + line[4]
+            # }
             subject = {
-                "id": subject_id,
                 "name": line[0],
-                extra_property: subject_id,
-                "type": 'biolink:' + line[4]
+                "type": 'biolink:' + line[4],
+                **subject_id.to_dict()
             }
 
             object_category = line[8]
             if object_category == 'ChemicalSubstance':
                 object_category = 'SmallMolecule'
 
-            object_id = line[7]
-            if object_id.startswith('CHEMBL:'):
-                object_id = 'CHEMBL_COMPOUND:' + object_id.split(':')[1]
-            elif object_id.startswith('CHEMBL'):
-                object_id = 'CHEMBL_COMPOUND:' + object_id
-            elif object_id.startswith('CHEBI:'):
-                pass
-            elif object_id.startswith('HMS_LINCS_ID:'):
-                pass
-            elif object_id.startswith('CID:'):
-                pass
-            elif object_id.startswith('PUBCHEM:'):
-                pass
-            else:
-                raise Exception(f"object_id '{object_id}' does not begin with CHEMBL at line {counter}")
+            object_id = Identifier.create_object_id(line[7])
+            if object_id is None:
+                continue
 
-            components = object_id.split(':')
-            if len(components) == 2:
-                extra_property = components[0]
-            else:
-                raise Exception(f"Unable to split {object_id} on a single colon at line {counter}")
-
+            # object_ = {
+            #     "id": object_id,
+            #     "name": line[6],
+            #     object_id_key: object_id_value,
+            #     "type": 'biolink:' + object_category
+            # }
             object_ = {
-                "id": object_id,
                 "name": line[6],
-                extra_property: object_id,
-                "type": 'biolink:' + object_category
+                "type": 'biolink:' + object_category,
+                **object_id.to_dict()
             }
 
             edge_attributes = []
@@ -308,7 +287,7 @@ def load_file(filename_path):
             #    print(f"{counter}.. ", end='', flush=True)
 
             #### Create a unique record_id, verify that it's unique, and then create a hash to make it shorter
-            record_id = 'DRKP-' + '-'.join( [ subject_id, line[9], object_id, line[18], line[13] ] )
+            record_id = 'DRKP-' + '-'.join( [ subject_id.full_id, line[9], object_id.full_id, line[18], line[13] ] )
             if record_id in record_ids:
                 record_ids[record_id] += 1
                 print(f"ERROR: Duplicate record id {record_id} found on line {counter}")
