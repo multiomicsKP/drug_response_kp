@@ -56,6 +56,38 @@ correlation_statistic = {
 
 
 class Identifier:
+    """
+    This class is to split a full CURIE-like ID by colon and reorganize the results into JSON format.
+    A full ID can be defined as <FULL-ID> = <PREFIX>:<LOCAL-ID>. The desired JSON format by BTE is like:
+
+        {
+            "id" : <FULL-ID>,
+            <PREFIX> : <LOCAL-ID>
+        }
+
+    However there are some extra rules. (See https://github.com/biothings/pending.api/issues/56 for more).
+
+    1. Some prefixes should be mapped to another form, like "CHEMBL" to "CHEMBL.COMPOUND"
+    2. If a prefix is mapped, the prefix part in its corresponding full ID should also be mapped
+    3. For certain types of prefixes, its corresponding local ID should always be prefixed, i.e. the local ID should be identical to the full ID
+    4. Any prefix should be lowercase, and period (.) within should be replaced with underscore (_). However, this rule does not apply to the prefix part in a full ID.
+
+    E.g. a full ID "CHEBI:90227", according to rule 3 and 4, will be formatted to:
+
+        {
+            "id" : "CHEBI:90227",
+            "chebi" : "CHEBI:90227"
+        }
+
+    E.g. a full ID "CHEMBL:CHEMBL62136", according to rule 1, 2, and 4, will be formatted to:
+
+        {
+            "id" : "CHEMBL.COMPOUND:CHEMBL62136",
+            "chembl_compound" : "CHEMBL62136"
+        }
+
+    Typically when a full ID is not received as <PREFIX>:<LOCAL-ID>, it will be discarded directly, except for gene ID starting with "ENSG0". In such cases, a prefix "ENSEMBL" will precede by default. 
+    """
     # as defined in https://github.com/biothings/biomedical_id_resolver.js/blob/master/src/config.ts#L4
     ALWAYS_PREFIXED = set(['RHEA', 'GO', 'CHEBI', 'HP', 'MONDO', 'DOID', 'EFO', 'UBERON', 'MP', 'CL', 'MGI'])
     
@@ -116,9 +148,6 @@ class Identifier:
             return None
         
         return id_obj
-
-
-
 
 
 def verify_header_line(line):
