@@ -55,7 +55,99 @@ correlation_statistic = {
 }
 
 
+class Identifier:
+    """
+    This class is to split a full CURIE-like ID by colon and reorganize the results into JSON format.
+    A full ID can be defined as <FULL-ID> = <PREFIX>:<LOCAL-ID>. The desired JSON format by BTE is like:
 
+        {
+            "id" : <FULL-ID>,
+            <PREFIX> : <LOCAL-ID>
+        }
+
+    However there are some extra rules. (See https://github.com/biothings/pending.api/issues/56 for more).
+
+    1. Some prefixes should be mapped to another form, like "CHEMBL" to "CHEMBL.COMPOUND"
+    2. If a prefix is mapped, the prefix part in its corresponding full ID should also be mapped
+    3. For certain types of prefixes, its corresponding local ID should always be prefixed, i.e. the local ID should be identical to the full ID
+    4. Any prefix should be lowercase, and period (.) within should be replaced with underscore (_). However, this rule does not apply to the prefix part in a full ID.
+
+    E.g. a full ID "CHEBI:90227", according to rule 3 and 4, will be formatted to:
+
+        {
+            "id" : "CHEBI:90227",
+            "chebi" : "CHEBI:90227"
+        }
+
+    E.g. a full ID "CHEMBL:CHEMBL62136", according to rule 1, 2, and 4, will be formatted to:
+
+        {
+            "id" : "CHEMBL.COMPOUND:CHEMBL62136",
+            "chembl_compound" : "CHEMBL62136"
+        }
+
+    Typically when a full ID is not received as <PREFIX>:<LOCAL-ID>, it will be discarded directly, except for gene ID starting with "ENSG0". In such cases, a prefix "ENSEMBL" will precede by default. 
+    """
+    # as defined in https://github.com/biothings/biomedical_id_resolver.js/blob/master/src/config.ts#L4
+    ALWAYS_PREFIXED = set(['RHEA', 'GO', 'CHEBI', 'HP', 'MONDO', 'DOID', 'EFO', 'UBERON', 'MP', 'CL', 'MGI'])
+    
+    # see Colleen's suggestion in https://github.com/biothings/pending.api/issues/56#issuecomment-1063607497
+    # Prefix naming follows the biolink model, as defined in https://github.com/biolink/biolink-model/blob/master/context.jsonld
+    PREFIX_MAPPING = {
+        "PUBCHEM": "PUBCHEM.COMPOUND",
+        "CID": "PUBCHEM.COMPOUND",
+        "CHEMBL": "CHEMBL.COMPOUND"
+    }
+    
+    def __init__(self, _id: str):
+        self.full_id = _id
+        self.prefix = None
+        self.local_id = None
+    
+    def parse(self):
+        if not self.full_id:
+            raise TypeError(f"Cannot parse empty value. Got {self.full_id}.")
+        
+        id_parts = self.full_id.split(':')
+        num_parts = len(id_parts)
+        if num_parts != 2:
+            raise ValueError(f"Exactly 2 parts required after splitting on a single colon. Got {num_parts}.", num_parts)
+            
+        prefix, local_id = id_parts[0], id_parts[1]
+        prefix = self.PREFIX_MAPPING.get(prefix, prefix)
+        
+        self.full_id = f"{prefix}:{local_id}"
+        self.prefix = prefix.replace(r".", r"_").lower()
+        self.local_id = local_id if prefix not in self.ALWAYS_PREFIXED else local_id
+        
+    def to_dict(self, full_id_key="id"):
+        return { full_id_key: self.full_id, self.prefix: self.local_id }
+    
+    @classmethod
+    def create_subject_id(cls, _id: str):
+        try:
+            id_obj = cls(_id)
+            id_obj.parse()
+        except TypeError:
+            return None
+        except ValueError as ve:
+            num_parts = ve.args[1]
+            if num_parts == 1 and _id.startswith('ENSG0'):
+                return cls.create_subject_id('ENSEMBL:' + _id)
+            else:
+                return None
+            
+        return id_obj
+            
+    @classmethod
+    def create_object_id(cls, _id: str): 
+        try:
+            id_obj = Identifier(_id)
+            id_obj.parse()
+        except (TypeError, ValueError):
+            return None
+        
+        return id_obj
 
 
 def verify_header_line(line):
@@ -108,61 +200,40 @@ def load_file(filename_path):
 
             counter += 1
 
-            subject_id = line[1]
-            #if subject_id.startswith('ENSG0'):
-            #    subject_id = 'ENSEMBL:' + subject_id
-            #elif subject_id.startswith('ENSEMBL:'):
-            #    pass
-            #elif subject_id == '':
-            #    print(f"ERROR: Empty CURIE for subject at line {counter}")
-            #    continue
-            #else:
-            #    raise Exception(f"subject_id {subject_id} does not begin with ENSG0 or ENSEMBL: at line {counter}")
-
-            components = subject_id.split(':')
-            if len(components) == 2:
-                extra_property = components[0]
-            else:
-                raise Exception(f"Unable to split {subject_id} on a single colon at line {counter}")
-
+            subject_id = Identifier.create_subject_id(line[1])
+            if subject_id is None:
+                continue
+                
+            # subject = {
+            #     "id": subject_id,
+            #     "name": line[0],
+            #     subject_id_key: subject_id_value,
+            #     "type": 'biolink:' + line[4]
+            # }
             subject = {
-                "id": subject_id,
                 "name": line[0],
-                extra_property: subject_id,
-                "type": 'biolink:' + line[4]
+                "type": 'biolink:' + line[4],
+                **subject_id.to_dict()
             }
 
             object_category = line[8]
             if object_category == 'ChemicalSubstance':
                 object_category = 'SmallMolecule'
 
-            object_id = line[7]
-            if object_id.startswith('CHEMBL:'):
-                object_id = 'CHEMBL_COMPOUND:' + object_id.split(':')[1]
-            elif object_id.startswith('CHEMBL'):
-                object_id = 'CHEMBL_COMPOUND:' + object_id
-            elif object_id.startswith('CHEBI:'):
-                pass
-            elif object_id.startswith('HMS_LINCS_ID:'):
-                pass
-            elif object_id.startswith('CID:'):
-                pass
-            elif object_id.startswith('PUBCHEM:'):
-                pass
-            else:
-                raise Exception(f"object_id '{object_id}' does not begin with CHEMBL at line {counter}")
+            object_id = Identifier.create_object_id(line[7])
+            if object_id is None:
+                continue
 
-            components = object_id.split(':')
-            if len(components) == 2:
-                extra_property = components[0]
-            else:
-                raise Exception(f"Unable to split {object_id} on a single colon at line {counter}")
-
+            # object_ = {
+            #     "id": object_id,
+            #     "name": line[6],
+            #     object_id_key: object_id_value,
+            #     "type": 'biolink:' + object_category
+            # }
             object_ = {
-                "id": object_id,
                 "name": line[6],
-                extra_property: object_id,
-                "type": 'biolink:' + object_category
+                "type": 'biolink:' + object_category,
+                **object_id.to_dict()
             }
 
             edge_attributes = []
@@ -248,7 +319,7 @@ def load_file(filename_path):
             #    print(f"{counter}.. ", end='', flush=True)
 
             #### Create a unique record_id, verify that it's unique, and then create a hash to make it shorter
-            record_id = 'DRKP-' + '-'.join( [ subject_id, line[9], object_id, line[18], line[13] ] )
+            record_id = 'DRKP-' + '-'.join( [ subject_id.full_id, line[9], object_id.full_id, line[18], line[13] ] )
             if record_id in record_ids:
                 record_ids[record_id] += 1
                 print(f"ERROR: Duplicate record id {record_id} found on line {counter}")
