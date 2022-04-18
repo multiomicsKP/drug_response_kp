@@ -6,16 +6,16 @@ import json
 distinction_type = {
         "Genetic variants": {
                 "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
-                "attribute_type_id": "biolink:GeneToDrugAssociation", # made up but similar to real GeneToDiseaseAssociation
+                "attribute_type_id": "biolink:GeneToDrugAssociation",  # made up but similar to real GeneToDiseaseAssociation
                 "description": "Sensitivity to the drug is associated with genetic variants of the gene",
-                "value": "biolink:GeneHasVariantThatContributesToDrugSensitivityAssociation", # made up but similar to real GeneHasVariantThatContributesToDiseaseAssociation
+                "value": "biolink:GeneHasVariantThatContributesToDrugSensitivityAssociation",  # made up but similar to real GeneHasVariantThatContributesToDiseaseAssociation
                 "value_type_id": "biolink:id"
         },
         "Expression": {
                 "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
-                "attribute_type_id": "biolink:GeneToDrugAssociation", # made up but similar to real GeneToDiseaseAssociation
+                "attribute_type_id": "biolink:GeneToDrugAssociation",  # made up but similar to real GeneToDiseaseAssociation
                 "description": "Sensitivity to the drug is associated with expression of the gene",
-                "value": "biolink:GeneHasExpressionThatContributesToDrugSensitivityAssociation", # made up but similar to real GeneHasVariantThatContributesToDiseaseAssociation
+                "value": "biolink:GeneHasExpressionThatContributesToDrugSensitivityAssociation",  # made up but similar to real GeneHasVariantThatContributesToDiseaseAssociation
                 "value_type_id": "biolink:id"
         }
 }
@@ -23,16 +23,16 @@ distinction_type = {
 concentration_endpoint = {
         "IC50": {
                 "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
-                "attribute_type_id": "BAO:0002162", # concentration response endpoint -- http://www.bioassayontology.org/bao#BAO_0002162
+                "attribute_type_id": "BAO:0002162",  # concentration response endpoint -- http://www.bioassayontology.org/bao#BAO_0002162
                 "description": "Method used to quantify the strength of the association is IC50",
-                "value": "BAO:0000190", # IC50 -- http://www.bioassayontology.org/bao#BAO_0000190
+                "value": "BAO:0000190",  # IC50 -- http://www.bioassayontology.org/bao#BAO_0000190
                 "value_type_id": "biolink:id"
         },
         "AUC": {
                 "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
-                "attribute_type_id": "BAO:0002162", # concentration response endpoint -- http://www.bioassayontology.org/bao#BAO_0002162
+                "attribute_type_id": "BAO:0002162",  # concentration response endpoint -- http://www.bioassayontology.org/bao#BAO_0002162
                 "description": "Method used to quantify the strength of the association is AUC",
-                "value": "BAO:0002120", # AUC -- http://www.bioassayontology.org/bao#BAO_0002120
+                "value": "BAO:0002120",  # AUC -- http://www.bioassayontology.org/bao#BAO_0002120
                 "value_type_id": "biolink:id"
         }
 }
@@ -40,16 +40,16 @@ concentration_endpoint = {
 correlation_statistic = {
         "T-test": {
                 "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
-                "attribute_type_id": "NCIT:C53236", # Correlation Test -- http://purl.obolibrary.org/obo/NCIT_C53236
+                "attribute_type_id": "NCIT:C53236",  # Correlation Test -- http://purl.obolibrary.org/obo/NCIT_C53236
                 "description": "t-test was used to compute the p-value for the association",
-                "value": "NCIT:C53231", # t-Test -- http://purl.obolibrary.org/obo/NCIT_C53231
+                "value": "NCIT:C53231",  # t-Test -- http://purl.obolibrary.org/obo/NCIT_C53231
                 "value_type_id": "biolink:id"
         },
         "Spearman_correlation": {
                 "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
-                "attribute_type_id": "NCIT:C53236", # Correlation Test -- http://purl.obolibrary.org/obo/NCIT_C53236
+                "attribute_type_id": "NCIT:C53236",  # Correlation Test -- http://purl.obolibrary.org/obo/NCIT_C53236
                 "description": "Spearman Correlation Test was used to compute the p-value for the association",
-                "value": "NCIT:C53249", # Spearman Correlation Test -- http://purl.obolibrary.org/obo/NCIT_C53249
+                "value": "NCIT:C53249",  # Spearman Correlation Test -- http://purl.obolibrary.org/obo/NCIT_C53249
                 "value_type_id": "biolink:id"
         }
 }
@@ -86,11 +86,11 @@ class Identifier:
             "chembl_compound" : "CHEMBL62136"
         }
 
-    Typically when a full ID is not received as <PREFIX>:<LOCAL-ID>, it will be discarded directly, except for gene ID starting with "ENSG0". In such cases, a prefix "ENSEMBL" will precede by default. 
+    Typically when a full ID is not received as <PREFIX>:<LOCAL-ID>, it will be discarded directly, except for gene ID starting with "ENSG0". In such cases, a prefix "ENSEMBL" will precede by default.
     """
     # as defined in https://github.com/biothings/biomedical_id_resolver.js/blob/master/src/config.ts#L4
     ALWAYS_PREFIXED = set(['RHEA', 'GO', 'CHEBI', 'HP', 'MONDO', 'DOID', 'EFO', 'UBERON', 'MP', 'CL', 'MGI'])
-    
+
     # see Colleen's suggestion in https://github.com/biothings/pending.api/issues/56#issuecomment-1063607497
     # Prefix naming follows the biolink model, as defined in https://github.com/biolink/biolink-model/blob/master/context.jsonld
     PREFIX_MAPPING = {
@@ -98,31 +98,31 @@ class Identifier:
         "CID": "PUBCHEM.COMPOUND",
         "CHEMBL": "CHEMBL.COMPOUND"
     }
-    
+
     def __init__(self, _id: str):
         self.full_id = _id
         self.prefix = None
         self.local_id = None
-    
+
     def parse(self):
         if not self.full_id:
             raise TypeError(f"Cannot parse empty value. Got {self.full_id}.")
-        
+
         id_parts = self.full_id.split(':')
         num_parts = len(id_parts)
         if num_parts != 2:
             raise ValueError(f"Exactly 2 parts required after splitting on a single colon. Got {num_parts}.", num_parts)
-            
+
         prefix, local_id = id_parts[0], id_parts[1]
         prefix = self.PREFIX_MAPPING.get(prefix, prefix)
-        
+
         self.full_id = f"{prefix}:{local_id}"
         self.prefix = prefix.replace(r".", r"_").lower()
         self.local_id = local_id if prefix not in self.ALWAYS_PREFIXED else local_id
-        
+
     def to_dict(self, full_id_key="id"):
-        return { full_id_key: self.full_id, self.prefix: self.local_id }
-    
+        return {full_id_key: self.full_id, self.prefix: self.local_id}
+
     @classmethod
     def create_subject_id(cls, _id: str):
         try:
@@ -136,17 +136,17 @@ class Identifier:
                 return cls.create_subject_id('ENSEMBL:' + _id)
             else:
                 return None
-            
+
         return id_obj
-            
+
     @classmethod
-    def create_object_id(cls, _id: str): 
+    def create_object_id(cls, _id: str):
         try:
             id_obj = Identifier(_id)
             id_obj.parse()
         except (TypeError, ValueError):
             return None
-        
+
         return id_obj
 
 
@@ -195,15 +195,13 @@ def load_file(filename_path):
                 first_line = False
                 continue
 
-            #print(line)
-
-
+            # print(line)
             counter += 1
 
             subject_id = Identifier.create_subject_id(line[1])
             if subject_id is None:
                 continue
-                
+
             # subject = {
             #     "id": subject_id,
             #     "name": line[0],
@@ -260,11 +258,11 @@ def load_file(filename_path):
             edge_attributes.append(
                 {
                     "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
-                    "attribute_type_id": "EDAM:data_0951", # statistical estimate score -- http://edamontology.org/data_0951
+                    "attribute_type_id": "EDAM:data_0951",  # statistical estimate score -- http://edamontology.org/data_0951
                     "description": "Confidence metric for the association",
                     "value": float(line[13]),
-                    "value_type_id": "EDAM:data_1669",   # P-value -- http://edamontology.org/data_1669
-                    "attributes": attributes
+                    "value_type_id": "EDAM:data_1669",  # P-value -- http://edamontology.org/data_1669
+                    "attributes": [attributes]  # sub-attributes should be a list per TRAPI standard
                 }
             )
 
@@ -272,7 +270,7 @@ def load_file(filename_path):
             edge_attributes.append(
                 {
                     "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
-                    "attribute_type_id": "GECKO:0000106", # sample size - http://purl.obolibrary.org/obo/GECKO_0000106
+                    "attribute_type_id": "GECKO:0000106",  # sample size - http://purl.obolibrary.org/obo/GECKO_0000106
                     "description": "Sample size used to compute the correlation",
                     "value": int(line[16]),
                 }
@@ -282,7 +280,7 @@ def load_file(filename_path):
             edge_attributes.append(
                 {
                     "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
-                    "attribute_type_id": "biolink:has_disease_context", # I made this up, but similar to biolink:has_population_context
+                    "attribute_type_id": "biolink:has_disease_context",  # I made this up, but similar to biolink:has_population_context
                     "description": "Disease context for the gene-drug sensitivity association",
                     "value": line[18],
                     "value_type_id": "biolink:id"
@@ -299,14 +297,15 @@ def load_file(filename_path):
                     "description": "Dataset used to compute the association",
                     "value": line[19],
                     "value_type_id": None,
-                    "attributes": 
+                    "attributes": [  # sub-attributes should be a list per TRAPI standard
                         {
                             "attribute_source": "infores:biothings-multiomics-biggim-drugresponse",
                             "attribute_type_id": "biolink:Publication",
                             "description": "Publication describing the dataset used to compute the association",
                             "value": pmid,
                             "value_type_id": "biolink:id"
-                    }
+                        }
+                    ]
                 }
             )
 
@@ -315,11 +314,11 @@ def load_file(filename_path):
                 "edge_attributes": edge_attributes
             }
 
-            #if counter / 10000 == int(counter / 10000):
+            # if counter / 10000 == int(counter / 10000):
             #    print(f"{counter}.. ", end='', flush=True)
 
-            #### Create a unique record_id, verify that it's unique, and then create a hash to make it shorter
-            record_id = 'DRKP-' + '-'.join( [ subject_id.full_id, line[9], object_id.full_id, line[18], line[13] ] )
+            # Create a unique record_id, verify that it's unique, and then create a hash to make it shorter
+            record_id = 'DRKP-' + '-'.join([subject_id.full_id, line[9], object_id.full_id, line[18], line[13]])
             if record_id in record_ids:
                 record_ids[record_id] += 1
                 print(f"ERROR: Duplicate record id {record_id} found on line {counter}")
@@ -349,8 +348,6 @@ def main():
         if verbose:
             print(json.dumps(row, sort_keys=True, indent=2))
         counter += 1
-        #if counter >= 2:
-        #    break
 
 
 if __name__ == "__main__":
